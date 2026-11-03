@@ -69,8 +69,9 @@ internal object XlsxReport {
                     v == null || (v is String && v.isEmpty()) -> rows.append("<c r=\"$ref\" s=\"$style\"/>")
                     v is Double -> rows.append("<c r=\"$ref\" s=\"$style\"><v>${num(v)}</v></c>")
                     else -> {
-                        val t = v.toString()
-                        rows.append("<c r=\"$ref\" s=\"${rtl(style, t)}\" t=\"inlineStr\"><is><t xml:space=\"preserve\">${xml(t)}</t></is></c>")
+                        val raw = v.toString()
+                        val t = if (ARABIC.containsMatchIn(raw)) ArabicShaper.shape(raw) else raw
+                        rows.append("<c r=\"$ref\" s=\"${rtl(style, raw)}\" t=\"inlineStr\"><is><t xml:space=\"preserve\">${xml(t)}</t></is></c>")
                     }
                 }
             }
