@@ -49,6 +49,7 @@ import com.boothly.app.data.Supplier
 import com.boothly.app.ocr.CardOcr
 import com.boothly.app.ocr.CardParser
 import com.boothly.app.ocr.ParsedCard
+import com.boothly.app.util.CityDetector
 import com.boothly.app.util.Images
 import com.boothly.app.util.toast
 import kotlinx.coroutines.Dispatchers
@@ -82,6 +83,7 @@ fun SupplierEditScreen(
     var wechat by rememberSaveable { mutableStateOf(existing?.wechat ?: "") }
     var website by rememberSaveable { mutableStateOf(existing?.website ?: "") }
     var address by rememberSaveable { mutableStateOf(existing?.address ?: "") }
+    var city by rememberSaveable { mutableStateOf(existing?.city ?: "") }
     var notes by rememberSaveable { mutableStateOf(existing?.notes ?: "") }
     var ocrText by rememberSaveable { mutableStateOf(existing?.ocrText ?: "") }
     var cards by rememberSaveable { mutableStateOf(existing?.cardImages?.joinToString("|") ?: "") }
@@ -127,6 +129,7 @@ fun SupplierEditScreen(
                 } else {
                     ocrText = listOf(ocrText, res.raw).filter { it.isNotBlank() }.joinToString("\n---\n")
                     applyParsed(CardParser.parse(res.lines, res.qr))
+                    if (city.isBlank()) city = CityDetector.detect(listOf(address, company, res.raw))
                 }
             } catch (e: Exception) {
                 toast(ctx, "Could not read card: ${e.message}")
@@ -179,6 +182,7 @@ fun SupplierEditScreen(
             wechat = wechat.trim(),
             whatsapp = whatsapp.trim(),
             address = address.trim(),
+            city = city.trim().ifBlank { CityDetector.detect(listOf(address, company, ocrText)) },
             booth = booth.trim(),
             notes = notes.trim(),
             cardImages = cardList(),
@@ -254,6 +258,7 @@ fun SupplierEditScreen(
             Field("WeChat ID", wechat, { wechat = it })
             Field("Website", website, { website = it }, KeyboardType.Uri)
             Field("Address", address, { address = it }, singleLine = false)
+            Field("City / region (for groups)", city, { city = it }, hint = "Guangzhou")
 
             SectionTitle("Notes")
             Field("Notes", notes, { notes = it }, singleLine = false, hint = "Impressions, follow-up, quality…")

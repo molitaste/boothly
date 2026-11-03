@@ -15,6 +15,7 @@ data class Supplier(
     val wechat: String = "",
     val whatsapp: String = "",
     val address: String = "",
+    val city: String = "",
     val booth: String = "",
     val notes: String = "",
     val cardImages: List<String> = emptyList(),
@@ -26,7 +27,7 @@ data class Supplier(
 
     fun matches(q: String): Boolean {
         if (q.isBlank()) return true
-        return listOf(company, contactName, title, website, wechat, whatsapp, address, booth, notes)
+        return listOf(company, contactName, title, website, wechat, whatsapp, address, city, booth, notes)
             .plus(phones).plus(emails)
             .any { it.contains(q, ignoreCase = true) }
     }
@@ -78,6 +79,7 @@ fun Supplier.toJson(): JSONObject = JSONObject().apply {
     put("wechat", wechat)
     put("whatsapp", whatsapp)
     put("address", address)
+    put("city", city)
     put("booth", booth)
     put("notes", notes)
     put("cardImages", cardImages.toJsonArray())
@@ -96,6 +98,7 @@ fun supplierFromJson(o: JSONObject): Supplier = Supplier(
     wechat = o.optString("wechat"),
     whatsapp = o.optString("whatsapp"),
     address = o.optString("address"),
+    city = o.optString("city"),
     booth = o.optString("booth"),
     notes = o.optString("notes"),
     cardImages = o.optJSONArray("cardImages").strings(),

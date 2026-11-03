@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Forum
 import androidx.compose.material.icons.filled.Inventory
 import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Share
@@ -59,7 +60,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.boothly.app.data.Repo
+import com.boothly.app.util.CityDetector
 import com.boothly.app.util.Contact
+import com.boothly.app.util.MapApps
 
 @Composable
 fun SupplierDetailScreen(
@@ -74,12 +77,17 @@ fun SupplierDetailScreen(
     val data by Repo.data.collectAsState()
     val s = data.suppliers.find { it.id == id }
     var confirmDelete by remember { mutableStateOf(false) }
+    var showMap by remember { mutableStateOf(false) }
 
     if (s == null) {
         LaunchedEffect(Unit) { onBack() }
         return
     }
     val products = data.products.filter { it.supplierId == id }.sortedByDescending { it.createdAt }
+
+    if (showMap) {
+        MapPickerDialog(query = MapApps.queryFor(s), onDismiss = { showMap = false })
+    }
 
     if (confirmDelete) {
         AlertDialog(
@@ -131,8 +139,19 @@ fun SupplierDetailScreen(
                     Text(s.displayName, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                     val who = listOf(s.contactName, s.title).filter { it.isNotBlank() }.joinToString(" · ")
                     if (who.isNotBlank()) Text(who, style = MaterialTheme.typography.titleMedium)
-                    if (s.booth.isNotBlank()) {
-                        AssistChip(onClick = {}, label = { Text("Booth ${s.booth}") }, modifier = Modifier.padding(top = 4.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        if (s.booth.isNotBlank()) {
+                            AssistChip(onClick = {}, label = { Text("Booth ${s.booth}") }, modifier = Modifier.padding(top = 4.dp))
+                        }
+                        val city = CityDetector.cityOf(s)
+                        if (city.isNotBlank()) {
+                            AssistChip(
+                                onClick = { showMap = true },
+                                label = { Text(city) },
+                                leadingIcon = { Icon(Icons.Filled.Place, contentDescription = null, modifier = Modifier.size(16.dp)) },
+                                modifier = Modifier.padding(top = 4.dp),
+                            )
+                        }
                     }
                 }
             }
@@ -158,18 +177,23 @@ fun SupplierDetailScreen(
                 ContactRow(Icons.Filled.Language, s.website, "Website", onClick = { Contact.web(ctx, s.website) })
             }
             if (s.address.isNotBlank()) item {
-                ContactRow(Icons.Filled.Place, s.address, "Address – open map", onClick = { Contact.map(ctx, s.address) })
+                ContactRow(Icons.Filled.Place, s.address, "Address – tap to choose map app", onClick = { showMap = true })
             }
             item {
                 Row(Modifier.padding(vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     FilledTonalButton(onClick = { Contact.saveToPhoneContacts(ctx, s) }, modifier = Modifier.weight(1f)) {
                         Icon(Icons.Filled.PersonAdd, contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(Modifier.width(6.dp))
-                        Text("Save contact")
+                        Spacer(Modifier.width(4.dp))
+                        Text("Contact")
+                    }
+                    FilledTonalButton(onClick = { showMap = true }, modifier = Modifier.weight(1f)) {
+                        Icon(Icons.Filled.Map, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(4.dp))
+                        Text("Map")
                     }
                     FilledTonalButton(onClick = { Contact.shareText(ctx, s) }, modifier = Modifier.weight(1f)) {
                         Icon(Icons.Filled.Share, contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(Modifier.width(6.dp))
+                        Spacer(Modifier.width(4.dp))
                         Text("Share")
                     }
                 }

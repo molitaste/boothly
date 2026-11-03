@@ -12,6 +12,16 @@
         <package android:name="com.whatsapp" />
         <package android:name="com.whatsapp.w4b" />
         <package android:name="com.tencent.mm" />
+        <package android:name="com.autonavi.minimap" />
+        <package android:name="com.baidu.BaiduMap" />
+        <package android:name="com.tencent.map" />
+        <package android:name="com.huawei.maps.app" />
+        <package android:name="com.google.android.apps.maps" />
+        <package android:name="com.waze" />
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="geo" />
+        </intent>
         <intent>
             <action android:name="android.media.action.IMAGE_CAPTURE" />
         </intent>

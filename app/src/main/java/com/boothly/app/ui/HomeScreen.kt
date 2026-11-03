@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -54,6 +55,7 @@ import androidx.compose.ui.unit.dp
 import com.boothly.app.data.Product
 import com.boothly.app.data.Repo
 import com.boothly.app.data.Supplier
+import com.boothly.app.util.CityDetector
 
 @Composable
 fun HomeScreen(
@@ -66,6 +68,7 @@ fun HomeScreen(
     val data by Repo.data.collectAsState()
     var tab by rememberSaveable { mutableIntStateOf(0) }
     var query by rememberSaveable { mutableStateOf("") }
+    var groupMode by rememberSaveable { mutableIntStateOf(1) }
 
     val suppliersById = data.suppliers.associateBy { it.id }
     val suppliers = data.suppliers
@@ -116,12 +119,42 @@ fun HomeScreen(
                 if (suppliers.isEmpty()) {
                     Empty(if (data.suppliers.isEmpty()) "No suppliers yet.\nTap “Scan new supplier” and photograph a business card." else "Nothing matches your search.")
                 } else {
+                    val groups: List<Pair<String, List<Supplier>>> = when (groupMode) {
+                        1 -> suppliers.groupBy { CityDetector.cityOf(it).ifBlank { "Unknown location" } }
+                            .toList().sortedWith(compareBy<Pair<String, List<Supplier>>>({ it.first == "Unknown location" }, { -it.second.size }, { it.first }))
+                        2 -> suppliers.groupBy { CityDetector.hallOf(it).ifBlank { "No booth number" } }
+                            .toList().sortedWith(compareBy<Pair<String, List<Supplier>>>({ it.first == "No booth number" }, { it.first }))
+                        else -> listOf("" to suppliers)
+                    }
+                    Row(
+                        Modifier.padding(start = 12.dp, end = 12.dp, top = 6.dp),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text("Group:", style = MaterialTheme.typography.labelMedium)
+                        listOf("None", "City", "Hall").forEachIndexed { i, label ->
+                            FilterChip(selected = groupMode == i, onClick = { groupMode = i }, label = { Text(label) })
+                        }
+                    }
                     LazyColumn(
-                        contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 8.dp, bottom = 96.dp),
+                        contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 4.dp, bottom = 96.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        items(suppliers, key = { it.id }) { s ->
-                            SupplierRow(s, data.products.count { it.supplierId == s.id }) { onOpenSupplier(s.id) }
+                        groups.forEach { (name, list) ->
+                            if (name.isNotEmpty()) {
+                                item(key = "group_$name") {
+                                    Text(
+                                        "$name  (${list.size})",
+                                        style = MaterialTheme.typography.titleSmall,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.padding(top = 10.dp, bottom = 2.dp),
+                                    )
+                                }
+                            }
+                            items(list, key = { it.id }) { s ->
+                                SupplierRow(s, data.products.count { it.supplierId == s.id }) { onOpenSupplier(s.id) }
+                            }
                         }
                     }
                 }
@@ -176,6 +209,7 @@ private fun SupplierRow(s: Supplier, productCount: Int, onClick: () -> Unit) {
                 if (who.isNotBlank()) Text(who, style = MaterialTheme.typography.bodySmall, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 val meta = listOfNotNull(
                     s.booth.takeIf { it.isNotBlank() }?.let { "Booth $it" },
+                    CityDetector.cityOf(s).takeIf { it.isNotBlank() },
                     "$productCount product" + if (productCount == 1) "" else "s",
                 ).joinToString(" · ")
                 Text(meta, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
