@@ -9,10 +9,10 @@
         android:fillColor="#FFFFFFFF"
         android:pathData="M35,37 H73 A5,5 0 0 1 78,42 V66 A5,5 0 0 1 73,71 H35 A5,5 0 0 1 30,66 V42 A5,5 0 0 1 35,37 Z" />
     <path
-        android:fillColor="#FF14508C"
+        android:fillColor="#FF14B8C4"
         android:pathData="M37,47 H58 V51 H37 Z M37,55 H70 V57.5 H37 Z M37,61 H64 V63.5 H37 Z" />
     <!-- price dot -->
     <path
-        android:fillColor="#FFF28C28"
+        android:fillColor="#FFFF7A59"
         android:pathData="M70,47 m-4.5,0 a4.5,4.5 0 1,0 9,0 a4.5,4.5 0 1,0 -9,0" />
 </vector>

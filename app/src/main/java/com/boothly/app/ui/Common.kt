@@ -45,22 +45,23 @@ import coil.compose.AsyncImage
 import com.boothly.app.data.Repo
 
 // ---- Ocean theme: deep blue + warm orange ----
-val OceanBlue = Color(0xFF14508C)
-val OceanOrange = Color(0xFFF28C28)
-val OceanBg = Color(0xFFF4F7FB)
-val OceanCardBorder = Color(0xFFD6E2F0)
-val OceanInk = Color(0xFF0C2A4A)
-val OceanMuted = Color(0xFF5F6B7A)
-val TagOrangeBg = Color(0xFFFDEBD8)
-val TagOrangeText = Color(0xFF8A4A0B)
-val TagBlueBg = Color(0xFFE1ECF8)
-val TagBlueText = Color(0xFF14508C)
+val OceanBlue = Color(0xFF0E8F99)          // text, buttons (darker teal for readability)
+val OceanHeader = Color(0xFF14B8C4)        // header turquoise
+val OceanOrange = Color(0xFFFF7A59)        // coral accent
+val OceanBg = Color(0xFFF0FBFA)
+val OceanCardBorder = Color(0xFFCDEFF1)
+val OceanInk = Color(0xFF1B2B3C)
+val OceanMuted = Color(0xFF6B7785)
+val TagOrangeBg = Color(0xFFFFE6DE)
+val TagOrangeText = Color(0xFFA33A1A)
+val TagBlueBg = Color(0xFFDCF5F6)
+val TagBlueText = Color(0xFF0B7780)
 
 private val LightOcean = lightColorScheme(
     primary = OceanBlue,
     onPrimary = Color.White,
-    primaryContainer = Color(0xFFD6E6F7),
-    onPrimaryContainer = OceanInk,
+    primaryContainer = Color(0xFFCFF2F4),
+    onPrimaryContainer = Color(0xFF06454A),
     secondary = OceanOrange,
     onSecondary = Color.White,
     secondaryContainer = TagOrangeBg,
@@ -71,21 +72,21 @@ private val LightOcean = lightColorScheme(
     onBackground = OceanInk,
     surface = OceanBg,
     onSurface = OceanInk,
-    surfaceVariant = Color(0xFFE6EEF7),
+    surfaceVariant = Color(0xFFE3F4F4),
     onSurfaceVariant = OceanMuted,
-    outline = Color(0xFF9DB0C6),
+    outline = Color(0xFF8FC9CD),
     outlineVariant = OceanCardBorder,
 )
 
 private val DarkOcean = darkColorScheme(
-    primary = Color(0xFF9CC4F0),
-    onPrimary = Color(0xFF0C2A4A),
-    primaryContainer = Color(0xFF1F3B5C),
-    onPrimaryContainer = Color(0xFFD6E6F7),
+    primary = Color(0xFF5FD8E0),
+    onPrimary = Color(0xFF06363A),
+    primaryContainer = Color(0xFF0F4B50),
+    onPrimaryContainer = Color(0xFFCFF2F4),
     secondary = OceanOrange,
     onSecondary = Color(0xFF2A1500),
-    secondaryContainer = Color(0xFF4A2A0A),
-    onSecondaryContainer = Color(0xFFFDD9B5),
+    secondaryContainer = Color(0xFF5A2516),
+    onSecondaryContainer = Color(0xFFFFD5C8),
     background = Color(0xFF10161F),
     surface = Color(0xFF10161F),
     surfaceVariant = Color(0xFF1C2532),
@@ -97,7 +98,7 @@ fun isDark() = isSystemInDarkTheme()
 
 /** Header colour: ocean blue by day, deep navy in dark mode. */
 @Composable
-fun headerColor(): Color = if (isDark()) Color(0xFF17283D) else OceanBlue
+fun headerColor(): Color = if (isDark()) Color(0xFF0F3B40) else OceanHeader
 
 @Composable
 fun cardColor(): Color = if (isDark()) Color(0xFF1A2330) else Color.White
