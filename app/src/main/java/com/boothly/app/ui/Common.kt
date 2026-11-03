@@ -94,7 +94,7 @@ private val DarkOcean = darkColorScheme(
 )
 
 @Composable
-fun isDark() = isSystemInDarkTheme()
+fun isDark() = false  // always the bright Aqua look, even when the phone is in dark mode
 
 /** Header colour: ocean blue by day, deep navy in dark mode. */
 @Composable

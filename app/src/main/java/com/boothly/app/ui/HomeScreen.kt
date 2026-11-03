@@ -101,7 +101,7 @@ fun HomeScreen(
                 TextField(
                     value = query,
                     onValueChange = { query = it },
-                    placeholder = { Text("Search supplier, product, booth, city…") },
+                    placeholder = { Text("Search…", maxLines = 1) },
                     leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
                     singleLine = true,
                     shape = RoundedCornerShape(24.dp),
