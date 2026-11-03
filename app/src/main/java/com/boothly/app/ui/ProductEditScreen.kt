@@ -245,6 +245,7 @@ fun ProductEditScreen(
             }
             Field("MOQ (minimum order)", moq, { moq = it }, hint = "e.g. 500 pcs")
             Field("Notes", notes, { notes = it }, singleLine = false, hint = "Size, material, lead time, colours…")
+            VoiceNoteButton { t -> notes = listOf(notes.trim(), t).filter { it.isNotEmpty() }.joinToString("\n") }
 
             Spacer(Modifier.height(16.dp))
             Button(onClick = { if (save()) onBack() }, enabled = !busy, modifier = Modifier.fillMaxWidth()) { Text("Save") }

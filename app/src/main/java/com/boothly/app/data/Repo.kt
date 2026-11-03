@@ -101,6 +101,22 @@ object Repo {
     }
 
     private fun prefs() = app.getSharedPreferences("boothly", Context.MODE_PRIVATE)
+    var azureKey: String
+        get() = prefs().getString("azureKey", "") ?: ""
+        set(v) {
+            prefs().edit().putString("azureKey", v.trim()).apply()
+        }
+    var azureRegion: String
+        get() = prefs().getString("azureRegion", "eastasia") ?: "eastasia"
+        set(v) {
+            prefs().edit().putString("azureRegion", v.trim().lowercase()).apply()
+        }
+    var voiceLanguage: String
+        get() = prefs().getString("voiceLang", "en-US") ?: "en-US"
+        set(v) {
+            prefs().edit().putString("voiceLang", v).apply()
+        }
+
     var lastCurrency: String
         get() = prefs().getString("currency", "USD") ?: "USD"
         set(v) {

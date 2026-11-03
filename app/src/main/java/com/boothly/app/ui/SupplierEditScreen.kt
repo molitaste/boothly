@@ -257,6 +257,7 @@ fun SupplierEditScreen(
 
             SectionTitle("Notes")
             Field("Notes", notes, { notes = it }, singleLine = false, hint = "Impressions, follow-up, quality…")
+            VoiceNoteButton { t -> notes = listOf(notes.trim(), t).filter { it.isNotEmpty() }.joinToString("\n") }
 
             if (ocrText.isNotBlank()) {
                 TextButton(onClick = { showRaw = !showRaw }) {

@@ -19,6 +19,7 @@ import com.boothly.app.ui.HomeScreen
 import com.boothly.app.ui.PhotoScreen
 import com.boothly.app.ui.ProductEditScreen
 import com.boothly.app.ui.ScannerScreen
+import com.boothly.app.ui.SettingsScreen
 import com.boothly.app.ui.SupplierDetailScreen
 import com.boothly.app.ui.SupplierEditScreen
 
@@ -51,6 +52,7 @@ fun AppNav() {
                 onNewSupplier = { nav.navigate("editSupplier/new") },
                 onOpenProduct = { p -> nav.navigate("product/${p.supplierId}/${p.id}") },
                 onExport = { nav.navigate("export") },
+                onSettings = { nav.navigate("settings") },
             )
         }
         composable("supplier/{id}") { e ->
@@ -101,6 +103,9 @@ fun AppNav() {
                 },
                 onCancel = { nav.popBackStack() },
             )
+        }
+        composable("settings") {
+            SettingsScreen(onBack = { nav.popBackStack() })
         }
         composable("export") {
             ExportScreen(onBack = { nav.popBackStack() })

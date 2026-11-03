@@ -11,8 +11,8 @@ android {
         applicationId = "com.boothly.app"
         minSdk = 24
         targetSdk = 35
-        versionCode = 2
-        versionName = "1.1"
+        versionCode = 3
+        versionName = "1.2"
         ndk {
             abiFilters += listOf("arm64-v8a", "armeabi-v7a")
         }
@@ -94,6 +94,8 @@ dependencies {
     implementation("androidx.camera:camera-lifecycle:$camerax")
     implementation("androidx.camera:camera-view:$camerax")
     implementation("org.opencv:opencv:4.10.0")
+    // Voice notes: Microsoft Azure speech-to-text (works in China)
+    implementation("com.microsoft.cognitiveservices.speech:client-sdk:1.40.0")
     // Offline OCR: Arabic
     implementation("cz.adaptech.tesseract4android:tesseract4android:4.7.0")
 }

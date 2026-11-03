@@ -23,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DocumentScanner
 import androidx.compose.material.icons.filled.Inventory
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material3.Card
@@ -60,6 +61,7 @@ fun HomeScreen(
     onNewSupplier: () -> Unit,
     onOpenProduct: (Product) -> Unit,
     onExport: () -> Unit,
+    onSettings: () -> Unit,
 ) {
     val data by Repo.data.collectAsState()
     var tab by rememberSaveable { mutableIntStateOf(0) }
@@ -79,6 +81,7 @@ fun HomeScreen(
                 title = { Text("Boothly", fontWeight = FontWeight.Bold) },
                 actions = {
                     IconButton(onClick = onExport) { Icon(Icons.Filled.Share, contentDescription = "Export & backup") }
+                    IconButton(onClick = onSettings) { Icon(Icons.Filled.Settings, contentDescription = "Settings") }
                 },
             )
         },
