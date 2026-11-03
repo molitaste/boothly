@@ -174,7 +174,7 @@ fun ProductEditScreen(
         topBar = {
             BackTopBar(if (isNew) "New product" else "Edit product", onBack) {
                 if (!isNew) IconButton(onClick = { confirmDelete = true }) { Icon(Icons.Filled.Delete, contentDescription = "Delete") }
-                TextButton(onClick = { if (save()) onBack() }, enabled = !busy) { Text("SAVE") }
+                TextButton(onClick = { if (save()) onBack() }, enabled = !busy) { Text("SAVE", color = androidx.compose.ui.graphics.Color.White, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold) }
             }
         },
     ) { pad ->

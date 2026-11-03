@@ -26,6 +26,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.Shapes
+import androidx.compose.foundation.border
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
@@ -41,18 +44,101 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.boothly.app.data.Repo
 
-private val Brand = Color(0xFF14508C)
-private val Accent = Color(0xFFF28C28)
+// ---- Ocean theme: deep blue + warm orange ----
+val OceanBlue = Color(0xFF14508C)
+val OceanOrange = Color(0xFFF28C28)
+val OceanBg = Color(0xFFF4F7FB)
+val OceanCardBorder = Color(0xFFD6E2F0)
+val OceanInk = Color(0xFF0C2A4A)
+val OceanMuted = Color(0xFF5F6B7A)
+val TagOrangeBg = Color(0xFFFDEBD8)
+val TagOrangeText = Color(0xFF8A4A0B)
+val TagBlueBg = Color(0xFFE1ECF8)
+val TagBlueText = Color(0xFF14508C)
+
+private val LightOcean = lightColorScheme(
+    primary = OceanBlue,
+    onPrimary = Color.White,
+    primaryContainer = Color(0xFFD6E6F7),
+    onPrimaryContainer = OceanInk,
+    secondary = OceanOrange,
+    onSecondary = Color.White,
+    secondaryContainer = TagOrangeBg,
+    onSecondaryContainer = TagOrangeText,
+    tertiary = OceanOrange,
+    onTertiary = Color.White,
+    background = OceanBg,
+    onBackground = OceanInk,
+    surface = OceanBg,
+    onSurface = OceanInk,
+    surfaceVariant = Color(0xFFE6EEF7),
+    onSurfaceVariant = OceanMuted,
+    outline = Color(0xFF9DB0C6),
+    outlineVariant = OceanCardBorder,
+)
+
+private val DarkOcean = darkColorScheme(
+    primary = Color(0xFF9CC4F0),
+    onPrimary = Color(0xFF0C2A4A),
+    primaryContainer = Color(0xFF1F3B5C),
+    onPrimaryContainer = Color(0xFFD6E6F7),
+    secondary = OceanOrange,
+    onSecondary = Color(0xFF2A1500),
+    secondaryContainer = Color(0xFF4A2A0A),
+    onSecondaryContainer = Color(0xFFFDD9B5),
+    background = Color(0xFF10161F),
+    surface = Color(0xFF10161F),
+    surfaceVariant = Color(0xFF1C2532),
+    outlineVariant = Color(0xFF2C3747),
+)
+
+@Composable
+fun isDark() = isSystemInDarkTheme()
+
+/** Header colour: ocean blue by day, deep navy in dark mode. */
+@Composable
+fun headerColor(): Color = if (isDark()) Color(0xFF17283D) else OceanBlue
+
+@Composable
+fun cardColor(): Color = if (isDark()) Color(0xFF1A2330) else Color.White
+
+@Composable
+fun cardBorderColor(): Color = if (isDark()) Color(0xFF2C3747) else OceanCardBorder
 
 @Composable
 fun BoothlyTheme(content: @Composable () -> Unit) {
-    val scheme = if (isSystemInDarkTheme()) {
-        darkColorScheme(primary = Color(0xFF9CC4F0), secondary = Accent, tertiary = Accent)
-    } else {
-        lightColorScheme(primary = Brand, secondary = Accent, tertiary = Accent)
-    }
-    MaterialTheme(colorScheme = scheme, content = content)
+    MaterialTheme(
+        colorScheme = if (isDark()) DarkOcean else LightOcean,
+        shapes = Shapes(
+            small = RoundedCornerShape(10.dp),
+            medium = RoundedCornerShape(14.dp),
+            large = RoundedCornerShape(18.dp),
+        ),
+        content = content,
+    )
 }
+
+/** Small rounded coloured tag (booth, city…). */
+@Composable
+fun Tag(text: String, bg: Color, fg: Color, modifier: Modifier = Modifier) {
+    Text(
+        text,
+        color = fg,
+        style = MaterialTheme.typography.labelSmall,
+        fontWeight = FontWeight.Medium,
+        modifier = modifier
+            .background(bg, RoundedCornerShape(10.dp))
+            .padding(horizontal = 8.dp, vertical = 2.dp),
+    )
+}
+
+@Composable
+fun oceanTopBarColors() = TopAppBarDefaults.topAppBarColors(
+    containerColor = headerColor(),
+    titleContentColor = Color.White,
+    navigationIconContentColor = Color.White,
+    actionIconContentColor = Color.White,
+)
 
 @Composable
 fun BackTopBar(title: String, onBack: () -> Unit, actions: @Composable RowScope.() -> Unit = {}) {
@@ -62,6 +148,7 @@ fun BackTopBar(title: String, onBack: () -> Unit, actions: @Composable RowScope.
             IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") }
         },
         actions = actions,
+        colors = oceanTopBarColors(),
     )
 }
 
@@ -129,6 +216,7 @@ fun SectionTitle(text: String, modifier: Modifier = Modifier) {
         text,
         style = MaterialTheme.typography.titleMedium,
         fontWeight = FontWeight.SemiBold,
+        color = MaterialTheme.colorScheme.primary,
         modifier = modifier.padding(top = 16.dp, bottom = 6.dp),
     )
 }

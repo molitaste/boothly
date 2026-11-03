@@ -200,7 +200,7 @@ fun SupplierEditScreen(
     Scaffold(
         topBar = {
             BackTopBar(if (isNew) "New supplier" else "Edit supplier", onBack) {
-                TextButton(onClick = { save() }, enabled = !busy) { Text("SAVE") }
+                TextButton(onClick = { save() }, enabled = !busy) { Text("SAVE", color = androidx.compose.ui.graphics.Color.White, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold) }
             }
         },
     ) { pad ->
