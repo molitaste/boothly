@@ -2,7 +2,6 @@
 
 package com.boothly.app.ui
 
-import android.content.ActivityNotFoundException
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -69,6 +68,9 @@ fun ProductEditScreen(
     productId: String,
     onBack: () -> Unit,
     onPhoto: (String) -> Unit,
+    onTakePhotos: () -> Unit,
+    scanned: String,
+    onScannedConsumed: () -> Unit,
 ) {
     val ctx = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -83,7 +85,6 @@ fun ProductEditScreen(
     var moq by rememberSaveable { mutableStateOf(existing?.moq ?: "") }
     var notes by rememberSaveable { mutableStateOf(existing?.notes ?: "") }
     var photos by rememberSaveable { mutableStateOf(existing?.photos?.joinToString("|") ?: "") }
-    var pending by rememberSaveable { mutableStateOf("") }
     var autoStarted by rememberSaveable { mutableStateOf(false) }
     var created by rememberSaveable { mutableStateOf(existing?.createdAt ?: 0L) }
     var busy by remember { mutableStateOf(false) }
@@ -92,18 +93,6 @@ fun ProductEditScreen(
 
     fun photoList(): List<String> = photos.split("|").filter { it.isNotBlank() }
 
-    val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok ->
-        val n = pending
-        pending = ""
-        if (ok && n.isNotBlank()) {
-            busy = true
-            scope.launch {
-                val good = withContext(Dispatchers.IO) { Images.normalize(Repo.photoFile(n)) }
-                if (good) photos = (photoList() + n).joinToString("|")
-                busy = false
-            }
-        }
-    }
     val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(10)) { uris ->
         if (uris.isNotEmpty()) {
             busy = true
@@ -115,18 +104,18 @@ fun ProductEditScreen(
         }
     }
 
-    fun openCamera() {
-        val f = Images.newPhotoFile()
-        pending = f.name
-        try {
-            cameraLauncher.launch(Images.uriFor(ctx, f))
-        } catch (_: ActivityNotFoundException) {
-            toast(ctx, "No camera app found")
+    fun openCamera() = onTakePhotos()
+
+    LaunchedEffect(scanned) {
+        if (scanned.isNotBlank()) {
+            val names = scanned.split("|").filter { it.isNotBlank() }
+            onScannedConsumed()
+            photos = (photoList() + names).joinToString("|")
         }
     }
 
     LaunchedEffect(Unit) {
-        if (isNew && !autoStarted && photoList().isEmpty()) {
+        if (isNew && !autoStarted && photoList().isEmpty() && scanned.isBlank()) {
             autoStarted = true
             openCamera()
         }

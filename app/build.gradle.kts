@@ -11,8 +11,11 @@ android {
         applicationId = "com.boothly.app"
         minSdk = 24
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.1"
+        ndk {
+            abiFilters += listOf("arm64-v8a", "armeabi-v7a")
+        }
     }
 
     // Fixed key so every new build installs as an UPDATE (your saved data stays).
@@ -52,6 +55,9 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+        jniLibs {
+            pickFirsts += "**/libc++_shared.so"
+        }
     }
     lint {
         checkReleaseBuilds = false
@@ -81,8 +87,13 @@ dependencies {
     implementation("com.google.mlkit:text-recognition-chinese:16.0.1")
     // QR codes printed on cards (vCard / WeChat / WhatsApp links)
     implementation("com.google.mlkit:barcode-scanning:17.2.0")
-    // Smart card scanner with auto edge detection (needs Google Play services, falls back to camera)
-    implementation("com.google.android.gms:play-services-mlkit-document-scanner:16.0.0-beta1")
+    // Built-in camera + FairScan-style card detection, crop & enhance (works without Google services)
+    val camerax = "1.3.4"
+    implementation("androidx.camera:camera-core:$camerax")
+    implementation("androidx.camera:camera-camera2:$camerax")
+    implementation("androidx.camera:camera-lifecycle:$camerax")
+    implementation("androidx.camera:camera-view:$camerax")
+    implementation("org.opencv:opencv:4.10.0")
     // Offline OCR: Arabic
     implementation("cz.adaptech.tesseract4android:tesseract4android:4.7.0")
 }

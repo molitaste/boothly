@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- No permissions needed: camera is opened through the phone's camera app,
-         and all OCR runs offline on the phone. -->
+    <!-- Camera for the built-in scanner. All OCR & image processing runs offline on the phone. -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
 
     <queries>
         <package android:name="com.whatsapp" />

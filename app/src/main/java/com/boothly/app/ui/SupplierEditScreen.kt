@@ -2,11 +2,8 @@
 
 package com.boothly.app.ui
 
-import android.app.Activity
-import android.content.ActivityNotFoundException
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -24,7 +21,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.DocumentScanner
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material3.Button
@@ -54,12 +50,7 @@ import com.boothly.app.ocr.CardOcr
 import com.boothly.app.ocr.CardParser
 import com.boothly.app.ocr.ParsedCard
 import com.boothly.app.util.Images
-import com.boothly.app.util.findActivity
 import com.boothly.app.util.toast
-import com.google.mlkit.vision.documentscanner.GmsDocumentScanner
-import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions
-import com.google.mlkit.vision.documentscanner.GmsDocumentScanning
-import com.google.mlkit.vision.documentscanner.GmsDocumentScanningResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -71,6 +62,9 @@ fun SupplierEditScreen(
     onBack: () -> Unit,
     onSaved: (String, Boolean) -> Unit,
     onPhoto: (String) -> Unit,
+    onScan: () -> Unit,
+    scanned: String,
+    onScannedConsumed: () -> Unit,
 ) {
     val ctx = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -91,7 +85,6 @@ fun SupplierEditScreen(
     var notes by rememberSaveable { mutableStateOf(existing?.notes ?: "") }
     var ocrText by rememberSaveable { mutableStateOf(existing?.ocrText ?: "") }
     var cards by rememberSaveable { mutableStateOf(existing?.cardImages?.joinToString("|") ?: "") }
-    var pending by rememberSaveable { mutableStateOf("") }
     var autoStarted by rememberSaveable { mutableStateOf(false) }
     var busy by remember { mutableStateOf(false) }
     var showRaw by remember { mutableStateOf(false) }
@@ -153,66 +146,24 @@ fun SupplierEditScreen(
         }
     }
 
-    val scanLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { res ->
-        if (res.resultCode == Activity.RESULT_OK) {
-            val result = GmsDocumentScanningResult.fromActivityResultIntent(res.data)
-            importUris(result?.pages?.map { it.imageUri } ?: emptyList())
-        }
-    }
-    val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok ->
-        val name = pending
-        pending = ""
-        if (ok && name.isNotBlank()) {
-            busy = true
-            scope.launch {
-                val good = withContext(Dispatchers.IO) { Images.normalize(Repo.photoFile(name)) }
-                busy = false
-                if (good) readCards(listOf(name))
-            }
-        }
-    }
     val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(2)) { uris ->
         importUris(uris)
     }
 
-    fun openCamera() {
-        val f = Images.newPhotoFile()
-        pending = f.name
-        try {
-            cameraLauncher.launch(Images.uriFor(ctx, f))
-        } catch (_: ActivityNotFoundException) {
-            toast(ctx, "No camera app found")
+    // Pictures coming back from the in-app scanner
+    LaunchedEffect(scanned) {
+        if (scanned.isNotBlank()) {
+            val names = scanned.split("|").filter { it.isNotBlank() }
+            onScannedConsumed()
+            readCards(names)
         }
-    }
-
-    fun smartScan() {
-        val activity = ctx.findActivity()
-        if (activity == null) {
-            openCamera()
-            return
-        }
-        val options = GmsDocumentScannerOptions.Builder()
-            .setGalleryImportAllowed(true)
-            .setPageLimit(2)
-            .setResultFormats(GmsDocumentScannerOptions.RESULT_FORMAT_JPEG)
-            .setScannerMode(GmsDocumentScannerOptions.SCANNER_MODE_FULL)
-            .build()
-        val scanner: GmsDocumentScanner = GmsDocumentScanning.getClient(options)
-        scanner.getStartScanIntent(activity)
-            .addOnSuccessListener { sender ->
-                scanLauncher.launch(IntentSenderRequest.Builder(sender).build())
-            }
-            .addOnFailureListener {
-                toast(ctx, "Smart scanner not available – using camera")
-                openCamera()
-            }
     }
 
     // New supplier: jump straight into card scanning
     LaunchedEffect(Unit) {
-        if (isNew && !autoStarted && cardList().isEmpty()) {
+        if (isNew && !autoStarted && cardList().isEmpty() && scanned.isBlank()) {
             autoStarted = true
-            smartScan()
+            onScan()
         }
     }
 
@@ -263,15 +214,10 @@ fun SupplierEditScreen(
                 PhotoStrip(list, onOpen = onPhoto, onRemove = { n -> cards = cardList().filter { it != n }.joinToString("|") })
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                Button(onClick = { smartScan() }, enabled = !busy, modifier = Modifier.weight(1f)) {
+                Button(onClick = { onScan() }, enabled = !busy, modifier = Modifier.weight(2f)) {
                     Icon(Icons.Filled.DocumentScanner, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(6.dp))
-                    Text("Scan")
-                }
-                OutlinedButton(onClick = { openCamera() }, enabled = !busy, modifier = Modifier.weight(1f)) {
-                    Icon(Icons.Filled.CameraAlt, contentDescription = null, modifier = Modifier.size(18.dp))
-                    Spacer(Modifier.width(6.dp))
-                    Text("Camera")
+                    Text("Scan card")
                 }
                 OutlinedButton(
                     onClick = { galleryLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },

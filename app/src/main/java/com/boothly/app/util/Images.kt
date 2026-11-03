@@ -75,6 +75,23 @@ object Images {
         return tmp.renameTo(out)
     }
 
+    /** Save a bitmap as JPEG into the photos folder (long side max 2000 px). Returns the file name. */
+    fun saveBitmap(src: Bitmap): String? {
+        val scale = minOf(1f, 2000f / maxOf(src.width, src.height))
+        val bmp = if (scale < 1f) Bitmap.createScaledBitmap(src, (src.width * scale).toInt(), (src.height * scale).toInt(), true) else src
+        val out = newPhotoFile()
+        val tmp = File(out.parentFile, out.name + ".tmp")
+        return try {
+            FileOutputStream(tmp).use { bmp.compress(Bitmap.CompressFormat.JPEG, 90, it) }
+            if (tmp.renameTo(out)) out.name else null
+        } catch (_: Exception) {
+            tmp.delete()
+            null
+        } finally {
+            if (bmp !== src) bmp.recycle()
+        }
+    }
+
     /** Decode a small version of a picture (for PDF export). */
     fun decodeSmall(f: File, targetW: Int, targetH: Int): Bitmap? {
         if (!f.exists()) return null
